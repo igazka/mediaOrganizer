@@ -16,58 +16,76 @@ repo="182038b5-958f-49ee-8d68-ba58fec3b346"
 # get all files in directory
     orgDir=Photos/Camera
     destDir=Photos/Organized
-    orgDirfiles=$(curl -H "Authorization: Token ${token}" -H 'Accept: application/json; indent=4' ${url}api2/repos/${repo}/dir/?p=/${orgDir} | jq --raw-output '.[] | {name} | .[]')
-    orgDirfiles=($orgDirfiles)
+# list of files from folder
+    orgDirfiles=$(curl -H "Authorization: Token ${token}" -H 'Accept: application/json; indent=4' ${url}api2/repos/${repo}/dir/?p=/${orgDir} | jq --raw-output '.[] | {name,type} | select(.type !="dir" ) | {name} | .[]')
+    IFS=$'\n' orgDirfiles=($orgDirfiles)
     echo "--------------------------------------------"
     echo "num of files: ${#orgDirfiles[@]}"
 for file in "${!orgDirfiles[@]}";do
-    #file=${orgDirfiles[1]} #remove this before changing to for loop
     echo "Processing: $file of ${#orgDirfiles[@]}"
-    printf '${orgDirfiles[%s]}=%s\n' "$file" "${orgDirfiles[file]}"
-    #check if file is photo
-    #        if [[ "$file" == *".jpg"* ]]; then
-    #            echo "It's a jpg."
-    #        elif [[ "$file" == *".mp4"* ]]; then
-    #            echo "It's a mp4."
-    #        fi
+    echo "${orgDirfiles[file]}"
+    #check if filename is valid
+        length=$(expr length "${orgDirfiles[file]}")
+            if [ $length -gt 0 ]&&[[ "${orgDirfiles[file]}" == *".jpg"* ]] || [[ "${orgDirfiles[file]}" == *".3gp"* ]] || [[ "${orgDirfiles[file]}" == *".mp4"* ]] && [[ "${orgDirfiles[file]}" != *" "* ]]; then
+                echo "good filename: ${orgDirfiles[file]}"
+            else
+                echo "bad file extension, of filename contains space: ${orgDirfiles[file]}"
+                continue
+            fi
     #download to temp
         if test -f "${orgDirfiles[file]}"; then
-            echo "${orgDirfiles[file]} exists."
+            echo "${orgDirfiles[file]} already downloaded."
         else
-            link=$(curl -H "Authorization: Token ${token}" -H 'Accept: application/json; charset=utf-8; indent=4' ${url}"api2/repos/182038b5-958f-49ee-8d68-ba58fec3b346/file/?p=/${orgDir}/${orgDirfiles[file]}&reuse=0" | jq --raw-output '.')
+            link=$(curl -H "Authorization: Token ${token}" -H 'Accept: application/json; charset=utf-8; indent=4' "${url}api2/repos/${repo}/file/?p=/${orgDir}/${orgDirfiles[file]}&reuse=0" | jq --raw-output '.')
             echo "$link"
+            downloadedfilename="${link##*/}"
+            echo $downloadedfilename
             curl -O "${link}"
         fi
     #get exif data
-        if [[ "${orgDirfiles[file]}" == *".jpg"* ]]; then
-           date=$(exiftool -p '$dateTimeOriginal' "${orgDirfiles[file]}")
-        #needs case if exif date is not found!!!  
-        elif [[ "${orgDirfiles[file]}" == *".mp4"* ]]; then
-            date=$(exiftool -p '$mediacreatedate' "${orgDirfiles[file]}")
+        if [[ "${downloadedfilename}" == *".jpg"* ]]; then
+           date=$(exiftool -p '$dateTimeOriginal' "${downloadedfilename}")
+        elif [[ "${downloadedfilename}" == *".mp4"*  ||  "${downloadedfilename}" == *".3gp"* ]]; then
+           date=$(exiftool -p '$mediacreatedate' "${downloadedfilename}")
         fi
         year=${date::4}
         month=${date:5:2}  
         echo "year: $year"
         echo "month: $month"
-        destSubDir="${year}"_"${month}"
-        echo $destSubDir
-        if  "$destSubDir"="_"; then
+        destSubDir="${year}"/"${month}"
+        if [ "${destSubDir}" == "/" ];then
             destSubDir="NoDate"
+            #check if file is already there
+            #destDirContent=$(curl -H "Authorization: Token ${token}" -H 'Accept: application/json; indent=4' "${url}api2/repos/${repo}/dir/?t=f&p=/${destDir}/" | jq --raw-output '.[] | {parent_dir, name} | if .parent_dir !="/Photos/Organized/" then "\(.parent_dir )/\(.name)" else "\(.parent_dir )\(.name)" end')
+            #exit
+            #move file on srv
+            curl -s -d "operation=move&dst_repo=${repo}&dst_dir=/${destDir}/${destSubDir}" -H "Authorization: Token ${token}" -H 'Accept: application/json; charset=utf-8; indent=4' ${url}api2/repos/${repo}/file/?p=/${orgDir}/${orgDirfiles[file]}
+            continue
         fi
+        echo $destSubDir       
     #delete file
         rm "${orgDirfiles[file]}"
     #check if directory exists
-        destDirContent=$(curl -H "Authorization: Token ${token}" -H 'Accept: application/json; indent=4' ${url}api2/repos/${repo}/dir/?p=/${destDir} | jq --raw-output '.[] | {name} | .[]')
-        destDirContent=($destDirContent)
-        if [[ " ${destDirContent[@]} " =~ " ${destSubDir} " ]]; then
+        destDirContent=$(curl -H "Authorization: Token ${token}" -H 'Accept: application/json; indent=4' "${url}api2/repos/${repo}/dir/?recursive=1&t=d&p=/${destDir}/" | jq --raw-output '.[] | {parent_dir, name} | if .parent_dir !="/Photos/Organized/" then "\(.parent_dir )/\(.name)" else "\(.parent_dir )\(.name)" end')
+        IFS=$'\n' destDirContent=($destDirContent)
+
+        if [[ " ${destDirContent[@]} " =~ "${destDir}/${year}" ]]; then
             # whatever you want to do when array contains value
-            echo "$destSubDir exists."
-        fi
-        if [[ ! " ${destDirContent[@]} " =~ " ${destSubDir} " ]]; then
-            # whatever you want to do when array doesn't contain value
-            #create Dir
+            echo "${destDir}/${year} exists."
+                if [[ " ${destDirContent[@]} " =~ "${destDir}/${year}/${month}" ]];then
+                    echo "${destDir}/${year}/${month} exists."
+                else 
+                curl -s -d "operation=mkdir" -H "Authorization: Token ${token}" -H 'Accept: application/json; charset=utf-8; indent=4' ${url}api2/repos/${repo}/dir/?p=/${destDir}/${destSubDir}
+                echo "$destSubDir created."
+                fi
+        else
+            curl -s -d "operation=mkdir" -H "Authorization: Token ${token}" -H 'Accept: application/json; charset=utf-8; indent=4' ${url}api2/repos/${repo}/dir/?p=/${destDir}/${year}
             curl -s -d "operation=mkdir" -H "Authorization: Token ${token}" -H 'Accept: application/json; charset=utf-8; indent=4' ${url}api2/repos/${repo}/dir/?p=/${destDir}/${destSubDir}
+            echo "$destSubDir created."
         fi
+    #check if file is already there
+        #destDirContent=$(curl -H "Authorization: Token ${token}" -H 'Accept: application/json; indent=4' "${url}api2/repos/${repo}/dir/?t=f&p=/${destDir}/" | jq --raw-output '.[] | {parent_dir, name} | if .parent_dir !="/Photos/Organized/" then "\(.parent_dir )/\(.name)" else "\(.parent_dir )\(.name)" end')
     #move file on srv
+
         curl -s -d "operation=move&dst_repo=${repo}&dst_dir=/${destDir}/${destSubDir}" -H "Authorization: Token ${token}" -H 'Accept: application/json; charset=utf-8; indent=4' ${url}api2/repos/${repo}/file/?p=/${orgDir}/${orgDirfiles[file]}
 done
