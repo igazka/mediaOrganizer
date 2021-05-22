@@ -56,15 +56,17 @@ for file in "${!orgDirfiles[@]}";do
         if [ "${destSubDir}" == "/" ];then
             destSubDir="NoDate"
             #check if file is already there
-            #destDirContent=$(curl -H "Authorization: Token ${token}" -H 'Accept: application/json; indent=4' "${url}api2/repos/${repo}/dir/?t=f&p=/${destDir}/" | jq --raw-output '.[] | {parent_dir, name} | if .parent_dir !="/Photos/Organized/" then "\(.parent_dir )/\(.name)" else "\(.parent_dir )\(.name)" end')
-            #exit
+            #destDirContent=$(curl -H "Authorization: Token ${token}" -H 'Accept: application/json; indent=4' "${url}api2/repos/${repo}/dir/?t=f&p=/${destDir}/${destSubDir}" | jq --raw-output '.[] | {parent_dir, name} | if .parent_dir !="/Photos/Organized/" then "\(.parent_dir )/\(.name)" else "\(.parent_dir )\(.name)" end')
+            
             #move file on srv
             curl -s -d "operation=move&dst_repo=${repo}&dst_dir=/${destDir}/${destSubDir}" -H "Authorization: Token ${token}" -H 'Accept: application/json; charset=utf-8; indent=4' ${url}api2/repos/${repo}/file/?p=/${orgDir}/${orgDirfiles[file]}
+            echo "File moved to: /${destDir}/${destSubDir}"
+            rm "${downloadedfilename}"
             continue
         fi
         echo $destSubDir       
     #delete file
-        rm "${orgDirfiles[file]}"
+        rm "${downloadedfilename}"
     #check if directory exists
         destDirContent=$(curl -H "Authorization: Token ${token}" -H 'Accept: application/json; indent=4' "${url}api2/repos/${repo}/dir/?recursive=1&t=d&p=/${destDir}/" | jq --raw-output '.[] | {parent_dir, name} | if .parent_dir !="/Photos/Organized/" then "\(.parent_dir )/\(.name)" else "\(.parent_dir )\(.name)" end')
         IFS=$'\n' destDirContent=($destDirContent)
@@ -84,8 +86,8 @@ for file in "${!orgDirfiles[@]}";do
             echo "$destSubDir created."
         fi
     #check if file is already there
-        #destDirContent=$(curl -H "Authorization: Token ${token}" -H 'Accept: application/json; indent=4' "${url}api2/repos/${repo}/dir/?t=f&p=/${destDir}/" | jq --raw-output '.[] | {parent_dir, name} | if .parent_dir !="/Photos/Organized/" then "\(.parent_dir )/\(.name)" else "\(.parent_dir )\(.name)" end')
+        #
     #move file on srv
-
         curl -s -d "operation=move&dst_repo=${repo}&dst_dir=/${destDir}/${destSubDir}" -H "Authorization: Token ${token}" -H 'Accept: application/json; charset=utf-8; indent=4' ${url}api2/repos/${repo}/file/?p=/${orgDir}/${orgDirfiles[file]}
+        echo "File moved to: /${destDir}/${destSubDir}"
 done
