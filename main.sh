@@ -81,23 +81,24 @@ for file in "${!orgDirfiles[@]}";do
     #check if directory exists
         #but only if first run or previously created new folders
         if [[ $folderCheck -eq 0 ]]; then
-            destDirContent=$(curl -H "Authorization: Token ${token}" -H 'Accept: application/json; indent=4' "${url}api2/repos/${repo}/dir/?recursive=1&t=d&p=/${destDir}/" | jq --raw-output '.[] | {parent_dir, name} | if .parent_dir !="/My Photos/Organized/" then "\(.parent_dir )/\(.name)" else "\(.parent_dir )\(.name)" end')
-            IFS=$'\n' destDirContent=($destDirContent)
+            folderStruct=$(curl -H "Authorization: Token ${token}" -H 'Accept: application/json; indent=4' "${url}api2/repos/${repo}/dir/?recursive=1&t=d&p=/${destDir}/" | jq --raw-output '.[] | {parent_dir, name} | if .parent_dir !="/My Photos/Organized/" then "\(.parent_dir )/\(.name)" else "\(.parent_dir )\(.name)" end')
+            IFS=$'\n' folderStruct=($folderStruct)
             folderCheck=1
             echo "Folder structure read from server."
         fi
         echo "--------------------------------------"
-        if [[ " ${destDirContent[@]} " =~ "${destDir//+/ }/${year}" ]]; then
+        if [[ " ${folderStruct[@]} " =~ "${destDir//+/ }/${year}" ]]; then
             echo "${destDir//+/ }/${year} exists."
-                if [[ " ${destDirContent[@]} " =~ "${destDir//+/ }/${year}/${month}" ]];then
+                if [[ " ${folderStruct[@]} " =~ "${destDir//+/ }/${year}/${month}" ]];then
                     echo "${destDir//+/ }/${year}/${month} exists."
                 else 
+                echo "${destDir//+/ }/${year}/${month} does not exist. Creating."
                 curl -s -d "operation=mkdir" -H "Authorization: Token ${token}" -H 'Accept: application/json; charset=utf-8; indent=4' ${url}api2/repos/${repo}/dir/?p=/${destDir}/${destSubDir}
-                echo "${destSubDir//+/ } created."
+                echo "${destDir//+/ }/${destSubDir//+/ } created."
                 folderCheck=0
                 fi
         else
-            echo "${destDir//+/ } does not exist. Creating."
+            echo "${destDir//+/ }/${destSubDir} does not exist. Creating."
             curl -s -d "operation=mkdir" -H "Authorization: Token ${token}" -H 'Accept: application/json; charset=utf-8; indent=4' ${url}api2/repos/${repo}/dir/?p=/${destDir}/${year}
             curl -s -d "operation=mkdir" -H "Authorization: Token ${token}" -H 'Accept: application/json; charset=utf-8; indent=4' ${url}api2/repos/${repo}/dir/?p=/${destDir}/${destSubDir}
             echo "$destSubDir created."
