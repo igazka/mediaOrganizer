@@ -22,7 +22,7 @@ repo="182038b5-958f-49ee-8d68-ba58fec3b346"
     echo "--------------------------------------------"
     echo "num of files: ${#orgDirfiles[@]}"
 for file in "${!orgDirfiles[@]}";do
-    echo "Processing: $file of ${#orgDirfiles[@]}"
+    echo -e "Processing: \e[1;31m$file\e[0m  of ${#orgDirfiles[@]}"  \e[1;31m\e[0m
     echo "${orgDirfiles[file]}"
     #check if filename is valid
         length=$(expr length "${orgDirfiles[file]}")
@@ -67,10 +67,10 @@ for file in "${!orgDirfiles[@]}";do
                 #if file already exists, then just remove the original, if not, then move file to dest
                     if [[ " ${destDirContent[@]} " =~ "${orgDirfiles[file]}" ]];then
                         curl -X DELETE -v  -H "Authorization: Token ${token}" -H 'Accept: application/json; charset=utf-8; indent=4' "${url}api2/repos/${repo}/file/?p=/${orgDir}/${orgDirfiles[file]}"                       
-                        echo "File already exists at: /${destDir}/${destSubDir}"
+                        echo -e "\e[1;32mFile already exists at: /${destDir}/${destSubDir}\e[0m"
                     else
                         curl -s -d "operation=move&dst_repo=${repo}&dst_dir=/${destDir}/${destSubDir}" -H "Authorization: Token ${token}" -H 'Accept: application/json; charset=utf-8; indent=4' ${url}api2/repos/${repo}/file/?p=/${orgDir}/${orgDirfiles[file]}
-                        echo "File moved to: /${destDir}/${destSubDir}"
+                        echo -e "\e[1;32mFile moved to: /${destDir}/${destSubDir}\e[0m"
                     fi
                     rm "${downloadedfilename}"
                     continue
@@ -103,9 +103,9 @@ for file in "${!orgDirfiles[@]}";do
                 #if file already exists, then just remove the original, if not, then move file to dest
                     if [[ " ${destDirContent[@]} " =~ "${orgDirfiles[file]}" ]];then
                         curl -X DELETE -v  -H "Authorization: Token ${token}" -H 'Accept: application/json; charset=utf-8; indent=4' "${url}api2/repos/${repo}/file/?p=/${orgDir}/${orgDirfiles[file]}"                       
-                        echo "File already exists at: /${destDir}/${destSubDir}"
+                        echo -e "\e[1;32mFile already exists at: /${destDir}/${destSubDir}\e[0m"
                     else
                         curl -s -d "operation=move&dst_repo=${repo}&dst_dir=/${destDir}/${destSubDir}" -H "Authorization: Token ${token}" -H 'Accept: application/json; charset=utf-8; indent=4' ${url}api2/repos/${repo}/file/?p=/${orgDir}/${orgDirfiles[file]}
-                        echo "File moved to: /${destDir}/${destSubDir}"
+                        echo -e "\e[1;32mFile moved to: /${destDir}/${destSubDir}\e[0m"
                     fi
 done
