@@ -1,6 +1,7 @@
-  GNU nano 4.8                                                                                                     orgTest.sh                                                                                                      Modified
 #!/bin/bash
-    #Organizing Media on my seafile instance with a bash script
+#Organizing Media on my seafile instance with a bash script
+#seting folderstructure checker to 0 
+    folderCheck=0
 #going to working folder 
     tempFolder=/home/andras/seafile/tmp/
     cd $tempFolder
@@ -10,7 +11,6 @@
     token=${token:10: -2}
 #see if auth is working
     curl -H "Authorization: Token ${token}" ${url}/api2/auth/ping/ 
-
 #curl -H "Authorization: Token ${token}" -H 'Accept: application/json; indent=4' ${url}api/v2.1/admin/libraries/?page=1&per_page=100 #this command gives back all the repos
 repo="182038b5-958f-49ee-8d68-ba58fec3b346"
 # get all files in directory
@@ -22,7 +22,7 @@ repo="182038b5-958f-49ee-8d68-ba58fec3b346"
     echo "--------------------------------------------"
     echo "num of files: ${#orgDirfiles[@]}"
 for file in "${!orgDirfiles[@]}";do
-    echo -e "Processing: \e[1;31m$file\e[0m  of ${#orgDirfiles[@]}"  \e[1;31m\e[0m
+    echo -e "Processing: \e[1;31m$file\e[0m  of ${#orgDirfiles[@]}" 
     echo "${orgDirfiles[file]}"
     #check if filename is valid
         length=$(expr length "${orgDirfiles[file]}")
@@ -79,8 +79,13 @@ for file in "${!orgDirfiles[@]}";do
     #delete file
         rm "${downloadedfilename}"
     #check if directory exists
-        destDirContent=$(curl -H "Authorization: Token ${token}" -H 'Accept: application/json; indent=4' "${url}api2/repos/${repo}/dir/?recursive=1&t=d&p=/${destDir}/" | jq --raw-output '.[] | {parent_dir, name} | if .parent_dir !="/My Photos/Organized/" then "\(.parent_dir )/\(.name)" else "\(.parent_dir )\(.name)" end')
-        IFS=$'\n' destDirContent=($destDirContent)
+        #but only if first run or previously created new folders
+        if [[ $folderCheck -eq 0 ]]; then
+            destDirContent=$(curl -H "Authorization: Token ${token}" -H 'Accept: application/json; indent=4' "${url}api2/repos/${repo}/dir/?recursive=1&t=d&p=/${destDir}/" | jq --raw-output '.[] | {parent_dir, name} | if .parent_dir !="/My Photos/Organized/" then "\(.parent_dir )/\(.name)" else "\(.parent_dir )\(.name)" end')
+            IFS=$'\n' destDirContent=($destDirContent)
+            folderCheck=1
+            echo "Folder structure read from server."
+        fi
         echo "--------------------------------------"
         if [[ " ${destDirContent[@]} " =~ "${destDir//+/ }/${year}" ]]; then
             echo "${destDir//+/ }/${year} exists."
@@ -89,12 +94,14 @@ for file in "${!orgDirfiles[@]}";do
                 else 
                 curl -s -d "operation=mkdir" -H "Authorization: Token ${token}" -H 'Accept: application/json; charset=utf-8; indent=4' ${url}api2/repos/${repo}/dir/?p=/${destDir}/${destSubDir}
                 echo "${destSubDir//+/ } created."
+                folderCheck=0
                 fi
         else
             echo "${destDir//+/ } does not exist. Creating."
             curl -s -d "operation=mkdir" -H "Authorization: Token ${token}" -H 'Accept: application/json; charset=utf-8; indent=4' ${url}api2/repos/${repo}/dir/?p=/${destDir}/${year}
             curl -s -d "operation=mkdir" -H "Authorization: Token ${token}" -H 'Accept: application/json; charset=utf-8; indent=4' ${url}api2/repos/${repo}/dir/?p=/${destDir}/${destSubDir}
             echo "$destSubDir created."
+            folderCheck=0
         fi
 
     #check if file is already there
