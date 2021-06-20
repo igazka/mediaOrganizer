@@ -33,6 +33,10 @@ for file in "${!orgDirfiles[@]}";do
             ext=".3gp"
             prefix="VID"
         fi
+        #'$dateTimeOriginal'
+        #'$DateAcquired'
+
+
         #if there is no exif data, rename to NOEXIF_DATA + current name
         if [[ "${#date}" -gt 0 ]]; then
             year=${date::4}
