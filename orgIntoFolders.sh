@@ -50,11 +50,14 @@ for file in "${!orgDirfiles[@]}";do
             destSubDir="NoDate"
         fi
      #check if file is already there
-                destDirContent=$(curl -H "Authorization: Token ${token}" -H 'Accept: application/json; indent=4' "${url}api2/repos/${repo}/dir/?t=f&p=/${destDir}/${destSubDir}" | jq --raw-output '.[] | .name')
+                destDirContent=$(ls -p | grep -v /)
                 IFS=$'\n' destDirContent=($destDirContent)
                 #if file already exists, then just remove the original, if not, then move file to dest
+
+#check file size and compare
+
                     if [[ " ${destDirContent[@]} " =~ "${orgDirfiles[file]}" ]];then
-                        curl -X DELETE -v  -H "Authorization: Token ${token}" -H 'Accept: application/json; charset=utf-8; indent=4' "${url}api2/repos/${repo}/file/?p=/${orgDir}/${orgDirfiles[file]}"                       
+                        rm "${orgDirfiles[file]}"
                         echo -e "\e[1;32mFile already exists at: /${destDir}/${destSubDir}\e[0m"
                     else
                         curl -s -d "operation=move&dst_repo=${repo}&dst_dir=/${destDir}/${destSubDir}" -H "Authorization: Token ${token}" -H 'Accept: application/json; charset=utf-8; indent=4' ${url}api2/repos/${repo}/file/?p=/${orgDir}/${orgDirfiles[file]}
