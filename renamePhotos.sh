@@ -21,24 +21,26 @@ for file in "${!orgDirfiles[@]}";do
             fi
     #get exif data
         if [[ "${orgDirfiles[file]}" == *".jpg"* || "${orgDirfiles[file]}" == *".JPG"* ]]; then
-           date=$(exiftool -p '$dateTimeOriginal' "${orgDirfiles[file]}")
+           dateTimeOriginal=$(exiftool -p '$dateTimeOriginal' "${orgDirfiles[file]}" -F)
+           if [[ "${#dateTimeOriginal}" -eq 0 || "$dateTimeOriginal" == "0000:00:00 00:00:00" ]]; then
+             date=$(exiftool -p '$DateAcquired' "${orgDirfiles[file]}" -F)
+            else 
+             date=$dateTimeOriginal
+           fi
            ext=".jpg"
            prefix="IMG"
-        elif [[ "${orgDirfiles[file]}" == *".mp4"* || "${orgDirfiles[file]}" == *".MP4"* ]]; then
-           date=$(exiftool -p '$mediacreatedate' "${orgDirfiles[file]}")
+         elif [[ "${orgDirfiles[file]}" == *".mp4"* || "${orgDirfiles[file]}" == *".MP4"* ]]; then
+           date=$(exiftool -p '$mediacreatedate' "${orgDirfiles[file]}" -F)
            ext=".mp4"
            prefix="VID"
-        elif  [[ "${orgDirfiles[file]}" == *".3gp"* || "${orgDirfiles[file]}" == *".3GP"* ]]; then
-            date=$(exiftool -p '$mediacreatedate' "${orgDirfiles[file]}")
+         elif  [[ "${orgDirfiles[file]}" == *".3gp"* || "${orgDirfiles[file]}" == *".3GP"* ]]; then
+            date=$(exiftool -p '$mediacreatedate' "${orgDirfiles[file]}" -F)
             ext=".3gp"
             prefix="VID"
         fi
-        #'$dateTimeOriginal'
-        #'$DateAcquired'
-
-
+        echo $date, "${#date}"
         #if there is no exif data, rename to NOEXIF_DATA + current name
-        if [[ "${#date}" -gt 0 ]]; then
+        if [[ "${#date}" -gt 0 || "$date" != "0000:00:00 00:00:00" ]]; then
             year=${date::4}
             month=${date:5:2}
             day=${date:8:2}
@@ -46,7 +48,6 @@ for file in "${!orgDirfiles[@]}";do
             minutes=${date:14:2}
             seconds=${date:17:2}  
             newFilename=$prefix"_"$year$month$day"_"$hour$minutes$seconds$ext
-            echo "New filename: $newFilename"
         else
             newFilename=$prefix"_NOEXIF_DATA"${orgDirfiles[file]}$ext
         fi
