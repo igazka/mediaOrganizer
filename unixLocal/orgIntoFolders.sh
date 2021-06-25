@@ -89,12 +89,12 @@ for file in "${!orgDirfiles[@]}";do
                             else 
                                 echo "they DIFFERENT, moving with care"
                                 #appending postfix, to be able to see differences
-                                prefix="mod"
+                                prefix="mod_"
                         fi
                     else
                         echo "file is not there yet"
                         prefix=""
                     fi
-                mv --backup=numbered ${orgDir}/${orgDirfiles[file]} ${orgDir}/${destSubDir}/$prefix_${orgDirfiles[file]}
+                mv --backup=numbered ${orgDir}/${orgDirfiles[file]} ${orgDir}/${destSubDir}/$prefix${orgDirfiles[file]}
                 echo -e "\e[1;32mFile moved to: ${orgDir}/${destSubDir}\e[0m"
 done
