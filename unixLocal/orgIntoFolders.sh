@@ -81,7 +81,7 @@ for file in "${!orgDirfiles[@]}";do
                 #if file already exists, then just remove the original, if not, then move file to dest
                     if [[ " ${destDirContent[@]} " =~ "${orgDirfiles[file]}" ]];then
                         #check file size and compare
-                        if [[ $(stat -c "%s"  "${destDirContent[@]}") -eq $(stat -c "%s"  "${orgDirfiles[file]}") ]]; then 
+                        if [[ $(stat -c "%s"  ${orgDir}/${destSubDir}/"${destDirContent[@]}") -eq $(stat -c "%s"  ${orgDir}/"${orgDirfiles[file]}") ]]; then 
                                 echo "they are the same size, you can delete it"
                                 rm ${orgDir}/"${orgDirfiles[file]}"
                                 echo -e "\e[1;32mFile already exists at: ${orgDir}/${destSubDir}\e[0m"
