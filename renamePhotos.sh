@@ -52,6 +52,10 @@ for file in "${!orgDirfiles[@]}";do
             newFilename=$prefix"_NOEXIF_DATA"${orgDirfiles[file]}$ext
         fi
     #renaming
-        mv --backup=numbered ${orgDirfiles[file]} $newFilename
-        echo "File: ${orgDirfiles[file]} is renamed to $newFilename."
+        if [[ "${orgDirfiles[file]}" == "$newFilename" ]]; then
+           echo "File ${orgDirfiles[file]} is already named $newFilename." 
+           else 
+             mv --backup=numbered ${orgDirfiles[file]} $newFilename
+             echo "File: ${orgDirfiles[file]} is renamed to $newFilename."
+        fi 
 done

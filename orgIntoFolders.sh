@@ -54,9 +54,11 @@ for file in "${!orgDirfiles[@]}";do
                 IFS=$'\n' destDirContent=($destDirContent)
                 #if file already exists, then just remove the original, if not, then move file to dest
 
-#check file size and compare
+
 
                     if [[ " ${destDirContent[@]} " =~ "${orgDirfiles[file]}" ]];then
+                        #check file size and compare
+                        
                         rm "${orgDirfiles[file]}"
                         echo -e "\e[1;32mFile already exists at: /${destDir}/${destSubDir}\e[0m"
                     else
