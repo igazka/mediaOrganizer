@@ -46,34 +46,33 @@ for file in "${!orgDirfiles[@]}";do
             year=${date::4}
             month=${date:5:2}
             destSubDir="${year}"/"${month}"
-        else
+         else
             destSubDir="NoDate"
         fi
      #check if file is already there
-                destDirContent=$(ls -p | grep -v /)
+                destDirContent=$(ls -p ${orgDir}/${destDir} | grep -v /)
                 IFS=$'\n' destDirContent=($destDirContent)
                 #if file already exists, then just remove the original, if not, then move file to dest
-
-
-
                     if [[ " ${destDirContent[@]} " =~ "${orgDirfiles[file]}" ]];then
                         #check file size and compare
-                        
-                        rm "${orgDirfiles[file]}"
-                        echo -e "\e[1;32mFile already exists at: /${destDir}/${destSubDir}\e[0m"
+                        if [[ $(stat -c "%s"  "${destDirContent[@]}") -eq $(stat -c "%s"  "${orgDirfiles[file]}") ]]; then 
+                                echo "they are the same size, you can delete it"
+                                rm "${orgDirfiles[file]}"
+                                echo -e "\e[1;32mFile already exists at: ${orgDir}/${destDir}\e[0m"
+                                continue
+                            else 
+                                echo "they DIFFERENT, moving with care"
+                        fi
                     else
-                        curl -s -d "operation=move&dst_repo=${repo}&dst_dir=/${destDir}/${destSubDir}" -H "Authorization: Token ${token}" -H 'Accept: application/json; charset=utf-8; indent=4' ${url}api2/repos/${repo}/file/?p=/${orgDir}/${orgDirfiles[file]}
-                        echo -e "\e[1;32mFile moved to: /${destDir}/${destSubDir}\e[0m"
+                        #file is not there yet
+                        #mv ${orgDir}/${orgDirfiles[file]} ${orgDir}/${destDir}/${orgDirfiles[file]}
+                        #echo -e "\e[1;32mFile moved to: /${destDir}/${destSubDir}\e[0m"
                     fi
-                    rm "${downloadedfilename}"
-                    continue
-        fi
-        echo $destSubDir       
 
     #check if directory exists
         #but only if first run or previously created new folders
         if [[ $folderCheck -eq 0 ]]; then
-            folderStruct=$(curl -H "Authorization: Token ${token}" -H 'Accept: application/json; indent=4' "${url}api2/repos/${repo}/dir/?recursive=1&t=d&p=/${destDir}/" | jq --raw-output '.[] | {parent_dir, name} | if .parent_dir !="/My Photos/Organized/" then "\(.parent_dir )/\(.name)" else "\(.parent_dir )\(.name)" end')
+            folderStruct=$(ls -R "$orgDir" | grep  / | rev | cut -c 2- | rev)
             IFS=$'\n' folderStruct=($folderStruct)
             folderCheck=1
             echo "Folder structure read from server."
