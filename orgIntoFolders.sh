@@ -49,26 +49,6 @@ for file in "${!orgDirfiles[@]}";do
          else
             destSubDir="NoDate"
         fi
-     #check if file is already there
-                destDirContent=$(ls -p ${orgDir}/${destDir} | grep -v /)
-                IFS=$'\n' destDirContent=($destDirContent)
-                #if file already exists, then just remove the original, if not, then move file to dest
-                    if [[ " ${destDirContent[@]} " =~ "${orgDirfiles[file]}" ]];then
-                        #check file size and compare
-                        if [[ $(stat -c "%s"  "${destDirContent[@]}") -eq $(stat -c "%s"  "${orgDirfiles[file]}") ]]; then 
-                                echo "they are the same size, you can delete it"
-                                rm "${orgDirfiles[file]}"
-                                echo -e "\e[1;32mFile already exists at: ${orgDir}/${destDir}\e[0m"
-                                continue
-                            else 
-                                echo "they DIFFERENT, moving with care"
-                        fi
-                    else
-                        #file is not there yet
-                        #mv ${orgDir}/${orgDirfiles[file]} ${orgDir}/${destDir}/${orgDirfiles[file]}
-                        #echo -e "\e[1;32mFile moved to: /${destDir}/${destSubDir}\e[0m"
-                    fi
-
     #check if directory exists
         #but only if first run or previously created new folders
         if [[ $folderCheck -eq 0 ]]; then
@@ -78,33 +58,40 @@ for file in "${!orgDirfiles[@]}";do
             echo "Folder structure read from server."
         fi
         echo "--------------------------------------"
-        if [[ " ${folderStruct[@]} " =~ "${destDir//+/ }/${year}" ]]; then
-            echo "${destDir//+/ }/${year} exists."
-                if [[ " ${folderStruct[@]} " =~ "${destDir//+/ }/${year}/${month}" ]];then
-                    echo "${destDir//+/ }/${year}/${month} exists."
+        if [[ " ${folderStruct[@]} " =~ "${orgDir}/${year}" ]]; then
+            echo "${orgDir}/${year} exists."
+                if [[ " ${folderStruct[@]} " =~ "${orgDir}/${year}/${month}" ]];then
+                    echo "${orgDir}/${year}/${month} exists."
                 else 
-                echo "${destDir//+/ }/${year}/${month} does not exist. Creating."
-                curl -s -d "operation=mkdir" -H "Authorization: Token ${token}" -H 'Accept: application/json; charset=utf-8; indent=4' ${url}api2/repos/${repo}/dir/?p=/${destDir}/${destSubDir}
-                echo "${destDir//+/ }/${destSubDir//+/ } created."
+                echo "${orgDir}/${year}/${month} does not exist. Creating."
+                mkdir ${orgDir}/${destSubDir}
+                echo "${orgDir}/${destSubDir} created."
                 folderCheck=0
                 fi
         else
-            echo "${destDir//+/ }/${destSubDir} does not exist. Creating."
-            curl -s -d "operation=mkdir" -H "Authorization: Token ${token}" -H 'Accept: application/json; charset=utf-8; indent=4' ${url}api2/repos/${repo}/dir/?p=/${destDir}/${year}
-            curl -s -d "operation=mkdir" -H "Authorization: Token ${token}" -H 'Accept: application/json; charset=utf-8; indent=4' ${url}api2/repos/${repo}/dir/?p=/${destDir}/${destSubDir}
+            echo "${orgDir}/${destSubDir} does not exist. Creating."
+            mkdir ${destDir}/${year}
+            mkdir ${destDir}/${destSubDir}
             echo "$destSubDir created."
             folderCheck=0
         fi
-
-    #check if file is already there
-        destDirContent=$(curl -H "Authorization: Token ${token}" -H 'Accept: application/json; indent=4' "${url}api2/repos/${repo}/dir/?t=f&p=/${destDir}/${destSubDir}" | jq --raw-output '.[] | .name')
-        IFS=$'\n' destDirContent=($destDirContent)
+     #check if file is already there
+                destDirContent=$(ls -p ${orgDir}/${destDir} | grep -v /)
+                IFS=$'\n' destDirContent=($destDirContent)
                 #if file already exists, then just remove the original, if not, then move file to dest
                     if [[ " ${destDirContent[@]} " =~ "${orgDirfiles[file]}" ]];then
-                        curl -X DELETE -v  -H "Authorization: Token ${token}" -H 'Accept: application/json; charset=utf-8; indent=4' "${url}api2/repos/${repo}/file/?p=/${orgDir}/${orgDirfiles[file]}"                       
-                        echo -e "\e[1;32mFile already exists at: /${destDir}/${destSubDir}\e[0m"
+                        #check file size and compare
+                        if [[ $(stat -c "%s"  "${destDirContent[@]}") -eq $(stat -c "%s"  "${orgDirfiles[file]}") ]]; then 
+                                echo "they are the same size, you can delete it"
+                                rm ${orgDir}/"${orgDirfiles[file]}"
+                                echo -e "\e[1;32mFile already exists at: ${orgDir}/${destDir}\e[0m"
+                                continue
+                            else 
+                                echo "they DIFFERENT, moving with care"
+                        fi
                     else
-                        curl -s -d "operation=move&dst_repo=${repo}&dst_dir=/${destDir}/${destSubDir}" -H "Authorization: Token ${token}" -H 'Accept: application/json; charset=utf-8; indent=4' ${url}api2/repos/${repo}/file/?p=/${orgDir}/${orgDirfiles[file]}
+                        #file is not there yet
+                        mv --backup=numbered ${orgDir}/${orgDirfiles[file]} ${orgDir}/${destDir}/${orgDirfiles[file]}
                         echo -e "\e[1;32mFile moved to: /${destDir}/${destSubDir}\e[0m"
                     fi
 done
