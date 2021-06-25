@@ -70,13 +70,13 @@ for file in "${!orgDirfiles[@]}";do
                 fi
         else
             echo "${orgDir}/${destSubDir} does not exist. Creating."
-            mkdir ${destDir}/${year}
-            mkdir ${destDir}/${destSubDir}
+            mkdir ${orgDir}/${year}
+            mkdir ${orgDir}/${destSubDir}
             echo "$destSubDir created."
             folderCheck=0
         fi
      #check if file is already there
-                destDirContent=$(ls -p ${orgDir}/${destDir} | grep -v /)
+                destDirContent=$(ls -p ${orgDir}/${destSubDir} | grep -v /)
                 IFS=$'\n' destDirContent=($destDirContent)
                 #if file already exists, then just remove the original, if not, then move file to dest
                     if [[ " ${destDirContent[@]} " =~ "${orgDirfiles[file]}" ]];then
@@ -84,14 +84,14 @@ for file in "${!orgDirfiles[@]}";do
                         if [[ $(stat -c "%s"  "${destDirContent[@]}") -eq $(stat -c "%s"  "${orgDirfiles[file]}") ]]; then 
                                 echo "they are the same size, you can delete it"
                                 rm ${orgDir}/"${orgDirfiles[file]}"
-                                echo -e "\e[1;32mFile already exists at: ${orgDir}/${destDir}\e[0m"
+                                echo -e "\e[1;32mFile already exists at: ${orgDir}/${destSubDir}\e[0m"
                                 continue
                             else 
                                 echo "they DIFFERENT, moving with care"
                         fi
                     else
                         #file is not there yet
-                        mv --backup=numbered ${orgDir}/${orgDirfiles[file]} ${orgDir}/${destDir}/${orgDirfiles[file]}
-                        echo -e "\e[1;32mFile moved to: /${destDir}/${destSubDir}\e[0m"
+                        mv --backup=numbered ${orgDir}/${orgDirfiles[file]} ${orgDir}/${destSubDir}/${orgDirfiles[file]}
+                        echo -e "\e[1;32mFile moved to: ${orgDir}/${destSubDir}\e[0m"
                     fi
 done
