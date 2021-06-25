@@ -81,17 +81,20 @@ for file in "${!orgDirfiles[@]}";do
                 #if file already exists, then just remove the original, if not, then move file to dest
                     if [[ " ${destDirContent[@]} " =~ "${orgDirfiles[file]}" ]];then
                         #check file size and compare
-                        if [[ $(stat -c "%s"  ${orgDir}/${destSubDir}/"${destDirContent[@]}") -eq $(stat -c "%s"  ${orgDir}/"${orgDirfiles[file]}") ]]; then 
-                                echo "they are the same size, you can delete it"
+                        if [[ $(stat -c "%s"  ${orgDir}/${destSubDir}/"${orgDirfiles[file]}") -eq $(stat -c "%s"  ${orgDir}/"${orgDirfiles[file]}") ]]; then 
+                                echo "they are the same size, delete it"
                                 rm ${orgDir}/"${orgDirfiles[file]}"
                                 echo -e "\e[1;32mFile already exists at: ${orgDir}/${destSubDir}\e[0m"
                                 continue
                             else 
                                 echo "they DIFFERENT, moving with care"
+                                #appending postfix, to be able to see differences
+                                postfix="mod"
                         fi
                     else
-                        #file is not there yet
-                        mv --backup=numbered ${orgDir}/${orgDirfiles[file]} ${orgDir}/${destSubDir}/${orgDirfiles[file]}
-                        echo -e "\e[1;32mFile moved to: ${orgDir}/${destSubDir}\e[0m"
+                        echo "file is not there yet"
+                        postfix=""
                     fi
+                mv --backup=numbered ${orgDir}/${orgDirfiles[file]} ${orgDir}/${destSubDir}/${orgDirfiles[file]}$postfix
+                echo -e "\e[1;32mFile moved to: ${orgDir}/${destSubDir}\e[0m"
 done
