@@ -26,6 +26,8 @@ for file in "${!orgDirfiles[@]}";do
            dateTimeOriginal=$(exiftool -p '$dateTimeOriginal' "${orgDirfiles[file]}" -F)
            if [[ "${#dateTimeOriginal}" -eq 0 || "$dateTimeOriginal" == "0000:00:00 00:00:00" ]]; then
              date=$(exiftool -p '$DateAcquired' "${orgDirfiles[file]}" -F)
+            # if [[ "${#dateTimeOriginal}" -eq 0 || "$dateTimeOriginal" == "0000:00:00 00:00:00" ]]; then
+            #  date=$(exiftool -p '${FileModifyDate#;DateFmt("%Y:%m:%d %H:%M:%S")}' "${orgDirfiles[file]}")
             else 
              date=$dateTimeOriginal
            fi

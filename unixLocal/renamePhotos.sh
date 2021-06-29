@@ -24,6 +24,8 @@ for file in "${!orgDirfiles[@]}";do
            dateTimeOriginal=$(exiftool -p '$dateTimeOriginal' "${orgDirfiles[file]}" -F)
            if [[ "${#dateTimeOriginal}" -eq 0 || "$dateTimeOriginal" == "0000:00:00 00:00:00" ]]; then
              date=$(exiftool -p '$DateAcquired' "${orgDirfiles[file]}" -F)
+            # if [[ "${#dateTimeOriginal}" -eq 0 || "$dateTimeOriginal" == "0000:00:00 00:00:00" ]]; then
+            #  date=$(exiftool -p '${FileModifyDate#;DateFmt("%Y:%m:%d %H:%M:%S")}' "${orgDirfiles[file]}")
             else 
              date=$dateTimeOriginal
            fi
@@ -41,7 +43,7 @@ for file in "${!orgDirfiles[@]}";do
         echo $date, "${#date}"
         #if there is no exif data, rename to NOEXIF_DATA + current name
         if [[ "${#date}" -eq 0 || "$date" == "0000:00:00 00:00:00" ]]; then
-            newFilename=$prefix"_NOEXIF_DATA"${orgDirfiles[file]}$ext
+            newFilename=$prefix"_NOEXIF_DATA_"${orgDirfiles[file]}$ext
         else
             year=${date::4}
             month=${date:5:2}
