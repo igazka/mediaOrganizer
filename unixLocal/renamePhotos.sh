@@ -40,7 +40,9 @@ for file in "${!orgDirfiles[@]}";do
         fi
         echo $date, "${#date}"
         #if there is no exif data, rename to NOEXIF_DATA + current name
-        if [[ "${#date}" -gt 0 || "$date" != "0000:00:00 00:00:00" ]]; then
+        if [[ "${#date}" -eq 0 || "$date" == "0000:00:00 00:00:00" ]]; then
+            newFilename=$prefix"_NOEXIF_DATA"${orgDirfiles[file]}$ext
+        else
             year=${date::4}
             month=${date:5:2}
             day=${date:8:2}
@@ -48,8 +50,6 @@ for file in "${!orgDirfiles[@]}";do
             minutes=${date:14:2}
             seconds=${date:17:2}  
             newFilename=$prefix"_"$year$month$day"_"$hour$minutes$seconds$ext
-        else
-            newFilename=$prefix"_NOEXIF_DATA"${orgDirfiles[file]}$ext
         fi
     #renaming
         if [[ "${orgDirfiles[file]}" == "$newFilename" ]]; then

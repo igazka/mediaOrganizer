@@ -42,12 +42,12 @@ for file in "${!orgDirfiles[@]}";do
         fi
         echo $date, "${#date}"
         #if there is no exif data, rename to NOEXIF_DATA + current name
-        if [[ "${#date}" -gt 0 || "$date" != "0000:00:00 00:00:00" ]]; then
+        if [[ "${#date}" -eq 0 || "$date" == "0000:00:00 00:00:00" ]]; then
+            destSubDir="NoDate"
+         else
             year=${date::4}
             month=${date:5:2}
             destSubDir="${year}"/"${month}"
-         else
-            destSubDir="NoDate"
         fi
     #check if directory exists
         #but only if first run or previously created new folders
