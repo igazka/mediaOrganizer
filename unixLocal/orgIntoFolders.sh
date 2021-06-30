@@ -22,7 +22,6 @@ for file in "${!orgDirfiles[@]}";do
                 continue
             fi
      #get exif data
-        if [[ "${orgDirfiles[file]}" == *".jpg"* || "${orgDirfiles[file]}" == *".JPG"* ]]; then
        if [[ "${orgDirfiles[file]}" == *".jpg"* || "${orgDirfiles[file]}" == *".JPG"* ]]; then
            date=$(exiftool -p '$dateTimeOriginal' "${orgDirfiles[file]}" -F)
            if [[ "${#date}" -eq 0 || "$date" == "0000:00:00 00:00:00" ]]; then
