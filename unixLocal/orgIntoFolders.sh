@@ -23,13 +23,13 @@ for file in "${!orgDirfiles[@]}";do
             fi
      #get exif data
         if [[ "${orgDirfiles[file]}" == *".jpg"* || "${orgDirfiles[file]}" == *".JPG"* ]]; then
-           dateTimeOriginal=$(exiftool -p '$dateTimeOriginal' "${orgDirfiles[file]}" -F)
-           if [[ "${#dateTimeOriginal}" -eq 0 || "$dateTimeOriginal" == "0000:00:00 00:00:00" ]]; then
+       if [[ "${orgDirfiles[file]}" == *".jpg"* || "${orgDirfiles[file]}" == *".JPG"* ]]; then
+           date=$(exiftool -p '$dateTimeOriginal' "${orgDirfiles[file]}" -F)
+           if [[ "${#date}" -eq 0 || "$date" == "0000:00:00 00:00:00" ]]; then
              date=$(exiftool -p '$DateAcquired' "${orgDirfiles[file]}" -F)
-            # if [[ "${#dateTimeOriginal}" -eq 0 || "$dateTimeOriginal" == "0000:00:00 00:00:00" ]]; then
-            #  date=$(exiftool -p '${FileModifyDate#;DateFmt("%Y:%m:%d %H:%M:%S")}' "${orgDirfiles[file]}")
-            else 
-             date=$dateTimeOriginal
+             if [[ "${#date}" -eq 0 || "$date" == "0000:00:00 00:00:00" ]]; then
+              date=$(exiftool -p '${FileModifyDate#;DateFmt("%Y:%m:%d %H:%M:%S")}' "${orgDirfiles[file]}")
+             fi
            fi
            ext=".jpg"
            prefix="IMG"
