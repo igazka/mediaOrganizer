@@ -54,9 +54,9 @@ for file in "${!orgDirfiles[@]}";do
         fi
     #renaming
         if [[ "${orgDirfiles[file]}" == "$newFilename" ]]; then
-           echo "File ${orgDirfiles[file]} is already named $newFilename." 
+           echo "File ${orgDirfiles[file]} is \e[1;32malready\e[0m named $newFilename." 
            else 
              mv --backup=numbered ${orgDirfiles[file]} $newFilename
-             echo "File: ${orgDirfiles[file]} is renamed to $newFilename."
+             echo "\e[1;32mFile: ${orgDirfiles[file]} is renamed to $newFilename.\e[0m"
         fi 
 done
