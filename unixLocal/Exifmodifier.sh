@@ -6,5 +6,5 @@ orgDirfiles=$(ls -p | grep -v /)
 IFS=$'\n' orgDirfiles=($orgDirfiles)
 
 for file in "${!orgDirfiles[@]}";do
-    exiftool -dateTimeOriginal="2018:03:17 00:00:01" "${orgDirfiles[file]}"
+    exiftool -dateTimeOriginal="2021:06:15 00:08:31" "${orgDirfiles[file]}"
 done
