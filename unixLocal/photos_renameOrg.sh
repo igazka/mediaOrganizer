@@ -12,22 +12,26 @@ srcFolder2=/home/andras/terraswinyo/images/CameraBogi
         if [[ ${#orgDirfiles[@]} -eq 0 ]]; then
             return 0 #no new files
         else
-            return 1
+            return ${#orgDirfiles[@]}
         fi
     
     }
 
 workdircontentlist $srcFolder1
-        if [[ $? -eq 0 ]]; then
-            echo "no new files exit program"
-        else
-            echo "new files in folder"
-        fi
-
+newfilesReturn1=$?
+workdircontentlist $srcFolder2
+newfilesReturn2=$?
+echo $newfilesReturn1" ,"$newfilesReturn2
 
 exit 0
     #check if filename is valid
-
+        length=$(expr length "${orgDirfiles[file]}")
+            if [ $length -gt 0 ]&&[[ "${orgDirfiles[file]}" == *".jpg"* || *".3gp"* || *".mp4"* || *".JPG"* ]]; then
+                echo "good filename: ${orgDirfiles[file]}"
+            else
+                echo "bad file extension: ${orgDirfiles[file]}, skipping"
+                continue
+            fi
     #get exif data
     getExif () {
         if [[ "${orgDirfiles[file]}" == *".jpg"* || "${orgDirfiles[file]}" == *".JPG"* ]]; then
