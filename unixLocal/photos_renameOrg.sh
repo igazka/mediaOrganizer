@@ -3,15 +3,29 @@
 srcFolder1=/home/andras/terraswinyo/images/Camera
 srcFolder2=/home/andras/terraswinyo/images/CameraBogi
 #go to working folder and list of files from folder
-    workdircontent () { #incoming parameter is the srcFolder currently used
-    cd $1
-    orgDirfiles=$(ls -p | grep -v /)
-    IFS=$'\n' orgDirfiles=($orgDirfiles)
-    #echo "--------------------------------------------"
-    #echo "num of files: ${#orgDirfiles[@]}"
+    workdircontentlist () { #incoming parameter is the srcFolder currently used
+        cd $1
+        orgDirfiles=$(ls -p | grep -v /)
+        IFS=$'\n' orgDirfiles=($orgDirfiles)
+        #echo "--------------------------------------------"
+        #echo "num of files: ${#orgDirfiles[@]}"
+        if [[ ${#orgDirfiles[@]} -eq 0 ]]; then
+            return 0 #no new files
+        else
+            return 1
+        fi
+    
     }
 
+workdircontentlist $srcFolder1
+        if [[ $? -eq 0 ]]; then
+            echo "no new files exit program"
+        else
+            echo "new files in folder"
+        fi
 
+
+exit 0
     #check if filename is valid
 
     #get exif data
