@@ -16,23 +16,23 @@ srcFolder2=/home/andras/terraswinyo/images/CameraBogi
         else
             echo "num of new files: ${#orgDirfiles[@]}"
                 for file in "${!orgDirfiles[@]}";do
-                    checkFileName ${!orgDirfiles[file]}
+                    checkFileName ${orgDirfiles[file]}
                 done
         fi
     }
-
+    checkFileName(){ #check if filename is valid
+        length=$(expr length "$1")
+        if [ $length -gt 0 ]&&[[ "$1" == *".jpg"* || *".3gp"* || *".mp4"* || *".JPG"* ]]; then
+            echo "good filename: $1"
+        else
+            echo "bad file extension: $1, skipping"
+            continue
+        fi
+    }
 workDirContentlist $srcFolder1
 #workDirContentlist $srcFolder2        
 exit 0
-    checkFileName(){ #check if filename is valid
-        length=$(expr length "$1")
-            if [ $length -gt 0 ]&&[[ "$1" == *".jpg"* || *".3gp"* || *".mp4"* || *".JPG"* ]]; then
-                echo "good filename: $1"
-            else
-                echo "bad file extension: $1, skipping"
-                continue
-            fi
-    }
+
     #get exif data
     getExif () {
         if [[ "${orgDirfiles[file]}" == *".jpg"* || "${orgDirfiles[file]}" == *".JPG"* ]]; then
