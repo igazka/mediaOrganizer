@@ -3,35 +3,36 @@
 srcFolder1=/home/andras/terraswinyo/images/Camera
 srcFolder2=/home/andras/terraswinyo/images/CameraBogi
 #go to working folder and list of files from folder
-    workdircontentlist () { #incoming parameter is the srcFolder currently used
+
+    workDirContentlist () { #incoming parameter is the srcFolder currently used
         cd $1
+        echo "--------------------------------------------"
+        echo "checking folder: $1"
         orgDirfiles=$(ls -p | grep -v /)
         IFS=$'\n' orgDirfiles=($orgDirfiles)
-        #echo "--------------------------------------------"
-        #echo "num of files: ${#orgDirfiles[@]}"
         if [[ ${#orgDirfiles[@]} -eq 0 ]]; then
-            return 0 #no new files
+            echo "#no new files in folder $1"
+            return 0 
         else
-            return ${#orgDirfiles[@]}
+            echo "num of new files: ${#orgDirfiles[@]}"
+                for file in "${!orgDirfiles[@]}";do
+                    checkFileName ${!orgDirfiles[file]}
+                done
         fi
-    
     }
 
-workdircontentlist $srcFolder1
-newfilesReturn1=$?
-workdircontentlist $srcFolder2
-newfilesReturn2=$?
-echo $newfilesReturn1" ,"$newfilesReturn2
-
+workDirContentlist $srcFolder1
+#workDirContentlist $srcFolder2        
 exit 0
-    #check if filename is valid
-        length=$(expr length "${orgDirfiles[file]}")
-            if [ $length -gt 0 ]&&[[ "${orgDirfiles[file]}" == *".jpg"* || *".3gp"* || *".mp4"* || *".JPG"* ]]; then
-                echo "good filename: ${orgDirfiles[file]}"
+    checkFileName(){ #check if filename is valid
+        length=$(expr length "$1")
+            if [ $length -gt 0 ]&&[[ "$1" == *".jpg"* || *".3gp"* || *".mp4"* || *".JPG"* ]]; then
+                echo "good filename: $1"
             else
-                echo "bad file extension: ${orgDirfiles[file]}, skipping"
+                echo "bad file extension: $1, skipping"
                 continue
             fi
+    }
     #get exif data
     getExif () {
         if [[ "${orgDirfiles[file]}" == *".jpg"* || "${orgDirfiles[file]}" == *".JPG"* ]]; then
