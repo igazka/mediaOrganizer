@@ -22,11 +22,10 @@ srcFolder2=/home/andras/terraswinyo/images/CameraBogi
     }
     checkFileName(){ #check if filename is valid
         length=$(expr length "$1")
-        if [ $length -gt 0 ]&&[[ "$1" == *".jpg"* || *".3gp"* || *".mp4"* || *".JPG"* ]]; then
+        if [[ $length -gt 0 ]]&&[[ "${1: -4}" == ".jpg" || "${1: -4}" == ".JPG" || "${1: -4}" == ".3gp" || "${1: -4}" == ".mp4" ]]; then
             echo "good filename: $1"
         else
             echo "bad file extension: $1, skipping"
-            continue
         fi
     }
 workDirContentlist $srcFolder1
