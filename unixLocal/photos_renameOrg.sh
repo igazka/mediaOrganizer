@@ -27,7 +27,7 @@ destDir=/home/andras/terraswinyo/images
                     getExif ${orgDirfiles[file]}
                     rename  ${orgDirfiles[file]}
                     getFolderStruct $1
-                    moveFile $1 ${orgDirfiles[file]}
+                    moveFile $1 $newFilename
                     fi
                 echo "----------------File-Done----------------"
                 done
@@ -115,7 +115,7 @@ destDir=/home/andras/terraswinyo/images
             folderChecked=0
         fi
     }
-    moveFile(){ #1=orgDir 2=${orgDirfiles[file]}
+    moveFile(){ #1=orgDir 2=$newFilename
                 #check if file is already there
                 destDirContent=$(ls -p ${destDir}/${destSubDir} | grep -v /)
                 IFS=$'\n' destDirContent=($destDirContent)
@@ -140,7 +140,7 @@ destDir=/home/andras/terraswinyo/images
                 echo -e "File moved to: ${destDir}/${destSubDir}"
     }
 workDirContentlist $srcFolder1
-#workDirContentlist $srcFolder2  
+workDirContentlist $srcFolder2  
 echo "----------------Script-Done----------------"      
 ) 2>&1 | tee "$(date +"%Y%m%d_%H%M%S")"
 
