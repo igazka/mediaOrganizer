@@ -1,7 +1,6 @@
 #!/bin/bash
 (
 #bash script to get all files from incoming folders, move them, rename them basesed on their EXIF data IMG_YYYYMMDD_HHMMSS.jpg then move them to destenation
-startDate=$(date +"%Y%m%d_%H%M%S")
 folderChecked=0 #value to enable reading destanation folder structure 
 srcFolder1=/home/andras/terraswinyo/images/Camera
 srcFolder2=/home/andras/terraswinyo/images/CameraBogi
@@ -118,7 +117,7 @@ srcFolder2=/home/andras/terraswinyo/images/CameraBogi
 workDirContentlist $srcFolder1
 #workDirContentlist $srcFolder2  
 echo "----------------Script-Done----------------"      
-) 2>&1 | tee -a file.log
+) 2>&1 | tee "$(date +"%Y%m%d_%H%M%S")"
 exit 0
 
      #check if file is already there
