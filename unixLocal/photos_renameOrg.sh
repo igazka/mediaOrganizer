@@ -143,4 +143,4 @@ workDirContentlist $srcFolder1
 workDirContentlist $srcFolder2  
 echo "----------------Script-Done----------------"      
 ) 2>&1 | tee "$(date +"%Y%m%d_%H%M%S").log"
-find -type f -name *.log -ctime +31 -exec rm {} \;
+find -maxdepth 1 -type f -name "*.log" -ctime +31 -exec rm {} \;
