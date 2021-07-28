@@ -1,5 +1,7 @@
 #!/bin/bash
+(
 #bash script to get all files from incoming folders, move them, rename them basesed on their EXIF data IMG_YYYYMMDD_HHMMSS.jpg then move them to destenation
+startDate=$(date +"%Y%m%d_%H%M%S")
 folderChecked=0 #value to enable reading destanation folder structure 
 srcFolder1=/home/andras/terraswinyo/images/Camera
 srcFolder2=/home/andras/terraswinyo/images/CameraBogi
@@ -7,7 +9,7 @@ srcFolder2=/home/andras/terraswinyo/images/CameraBogi
 
     workDirContentlist () { #incoming parameter is the srcFolder currently used
         cd $1
-        echo "------------------START------------------"
+        echo "------------------START-Script-----------------"
         echo "checking folder: $1"
         orgDirfiles=$(ls -p | grep -v /)
         IFS=$'\n' orgDirfiles=($orgDirfiles)
@@ -17,6 +19,7 @@ srcFolder2=/home/andras/terraswinyo/images/CameraBogi
         else
             echo "num of new files: ${#orgDirfiles[@]}"
                 for file in "${!orgDirfiles[@]}";do
+                echo ${orgDirfiles[file]}
                     checkFileExt ${orgDirfiles[file]}
                     if [[ $? -eq 1 ]]; then
                     continue
@@ -26,8 +29,8 @@ srcFolder2=/home/andras/terraswinyo/images/CameraBogi
                     getFolderStruct $1
                     
                     fi
-                done
                 echo "----------------File-Done----------------"
+                done
         fi
     }
     checkFileExt(){ #check if fileextension is valid
@@ -115,9 +118,8 @@ srcFolder2=/home/andras/terraswinyo/images/CameraBogi
 workDirContentlist $srcFolder1
 #workDirContentlist $srcFolder2  
 echo "----------------Script-Done----------------"      
+) 2>&1 | tee -a file.log
 exit 0
-
-
 
      #check if file is already there
                 destDirContent=$(ls -p ${orgDir}/${destSubDir} | grep -v /)
