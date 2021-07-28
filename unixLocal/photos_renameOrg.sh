@@ -126,7 +126,7 @@ destDir=/home/andras/terraswinyo/images
                                 echo "they are the same size, delete it"
                                 rm ${1}/"${2}"
                                 echo -e "File already exists at: ${destDir}/${destSubDir}"
-                                continue
+                                return 1
                             else 
                                 echo "they DIFFERENT, moving with care"
                                 #appending prefix, to be able to see differences
