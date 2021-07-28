@@ -19,7 +19,7 @@ srcFolder2=/home/andras/terraswinyo/images/CameraBogi
         else
             echo "num of new files: ${#orgDirfiles[@]}"
                 for file in "${!orgDirfiles[@]}";do
-                echo ${orgDirfiles[file]}
+                    echo -e "Processing: $file  of ${#orgDirfiles[@]}" 
                     checkFileExt ${orgDirfiles[file]}
                     if [[ $? -eq 1 ]]; then
                     continue
@@ -82,10 +82,10 @@ srcFolder2=/home/andras/terraswinyo/images/CameraBogi
     }
     rename () {
         if [[ "$1" == "$newFilename" ]]; then
-             echo "File $1 is \e[1;32malready\e[0m named $newFilename." 
+             echo "File $1 is already named $newFilename." 
            else 
              mv --backup=numbered $1 $newFilename
-             echo "\e[1;32mFile: $1 is renamed to $newFilename.\e[0m"
+             echo "File: $1 is renamed to $newFilename."
         fi 
     }
     getFolderStruct() {
@@ -130,7 +130,7 @@ exit 0
                         if [[ $(stat -c "%s"  ${orgDir}/${destSubDir}/"${orgDirfiles[file]}") -eq $(stat -c "%s"  ${orgDir}/"${orgDirfiles[file]}") ]]; then 
                                 echo "they are the same size, delete it"
                                 rm ${orgDir}/"${orgDirfiles[file]}"
-                                echo -e "\e[1;32mFile already exists at: ${orgDir}/${destSubDir}\e[0m"
+                                echo -e "File already exists at: ${orgDir}/${destSubDir}"
                                 continue
                             else 
                                 echo "they DIFFERENT, moving with care"
@@ -142,4 +142,4 @@ exit 0
                         prefix=""
                     fi
                 mv --backup=numbered ${orgDir}/${orgDirfiles[file]} ${orgDir}/${destSubDir}/$prefix${orgDirfiles[file]}
-                echo -e "\e[1;32mFile moved to: ${orgDir}/${destSubDir}\e[0m"
+                echo -e "File moved to: ${orgDir}/${destSubDir}"
