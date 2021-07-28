@@ -4,6 +4,7 @@
 folderChecked=0 #value to enable reading destanation folder structure 
 srcFolder1=/home/andras/terraswinyo/images/Camera
 srcFolder2=/home/andras/terraswinyo/images/CameraBogi
+destDir=/home/andras/terraswinyo/images
 #go to working folder and list of files from folder
 
     workDirContentlist () { #incoming parameter is the srcFolder currently used
@@ -26,7 +27,7 @@ srcFolder2=/home/andras/terraswinyo/images/CameraBogi
                     getExif ${orgDirfiles[file]}
                     rename  ${orgDirfiles[file]}
                     getFolderStruct $1
-                    
+                    moveFile $1 ${orgDirfiles[file]}
                     fi
                 echo "----------------File-Done----------------"
                 done
@@ -91,54 +92,55 @@ srcFolder2=/home/andras/terraswinyo/images/CameraBogi
         #check if directory exists
         #but only if first run or previously created new folders
        if [[ $folderChecked -eq 0 ]]; then
-            folderStruct=$(ls -R "$1" | grep  / | rev | cut -c 2- | rev)
+            folderStruct=$(ls -R "$destDir" | grep  / | rev | cut -c 2- | rev)
             IFS=$'\n' folderStruct=($folderStruct)
             folderChecked=1
             echo "Folder structure read from server."
         fi
-        if [[ " ${folderStruct[@]} " =~ "${1}/${year}" ]]; then
-             echo "${1}/${year} exists."
-                if [[ " ${folderStruct[@]} " =~ "${1}/${year}/${month}" ]];then
-                    echo "${1}/${year}/${month} exists."
+        if [[ " ${folderStruct[@]} " =~ "${destDir}/${year}" ]]; then
+             echo "${destDir}/${year} exists."
+                if [[ " ${folderStruct[@]} " =~ "${destDir}/${year}/${month}" ]];then
+                    echo "${destDir}/${year}/${month} exists."
                 else 
-                echo "${1}/${year}/${month} does not exist. Creating."
-                mkdir ${1}/${destSubDir}
-                echo "${1}/${destSubDir} created."
+                echo "${destDir}/${year}/${month} does not exist. Creating."
+                mkdir ${destDir}/${destSubDir}
+                echo "${destDir}/${destSubDir} created."
                 folderChecked=0
                 fi
         else
-            echo "${1}/${destSubDir} does not exist. Creating."
-            mkdir ${1}/${year}
-            mkdir ${1}/${destSubDir}
+            echo "${destDir}/${destSubDir} does not exist. Creating."
+            mkdir ${destDir}/${year}
+            mkdir ${destDir}/${destSubDir}
             echo "$destSubDir created."
             folderChecked=0
         fi
     }
-workDirContentlist $srcFolder1
-#workDirContentlist $srcFolder2  
-echo "----------------Script-Done----------------"      
-) 2>&1 | tee "$(date +"%Y%m%d_%H%M%S")"
-exit 0
-
-     #check if file is already there
-                destDirContent=$(ls -p ${orgDir}/${destSubDir} | grep -v /)
+    moveFile(){ #1=orgDir 2=${orgDirfiles[file]}
+                #check if file is already there
+                destDirContent=$(ls -p ${destDir}/${destSubDir} | grep -v /)
                 IFS=$'\n' destDirContent=($destDirContent)
                 #if file already exists, then just remove the original, if not, then move file to dest
-                    if [[ " ${destDirContent[@]} " =~ "${orgDirfiles[file]}" ]];then
+                    if [[ " ${destDirContent[@]} " =~ "${2}" ]];then
                         #check file size and compare
-                        if [[ $(stat -c "%s"  ${orgDir}/${destSubDir}/"${orgDirfiles[file]}") -eq $(stat -c "%s"  ${orgDir}/"${orgDirfiles[file]}") ]]; then 
+                        if [[ $(stat -c "%s"  ${destDir}/${destSubDir}/"${2}") -eq $(stat -c "%s"  ${1}/"${2}") ]]; then 
                                 echo "they are the same size, delete it"
-                                rm ${orgDir}/"${orgDirfiles[file]}"
-                                echo -e "File already exists at: ${orgDir}/${destSubDir}"
+                                rm ${1}/"${2}"
+                                echo -e "File already exists at: ${destDir}/${destSubDir}"
                                 continue
                             else 
                                 echo "they DIFFERENT, moving with care"
-                                #appending postfix, to be able to see differences
+                                #appending prefix, to be able to see differences
                                 prefix="mod_"
                         fi
                     else
                         echo "file is not there yet"
                         prefix=""
                     fi
-                mv --backup=numbered ${orgDir}/${orgDirfiles[file]} ${orgDir}/${destSubDir}/$prefix${orgDirfiles[file]}
-                echo -e "File moved to: ${orgDir}/${destSubDir}"
+                mv --backup=numbered ${1}/${2} ${destDir}/${destSubDir}/$prefix${2}
+                echo -e "File moved to: ${destDir}/${destSubDir}"
+    }
+workDirContentlist $srcFolder1
+#workDirContentlist $srcFolder2  
+echo "----------------Script-Done----------------"      
+) 2>&1 | tee "$(date +"%Y%m%d_%H%M%S")"
+
