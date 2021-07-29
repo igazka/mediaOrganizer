@@ -142,5 +142,5 @@ destDir=/home/andras/terraswinyo/images
 workDirContentlist $srcFolder1
 workDirContentlist $srcFolder2  
 echo "----------------Script-Done----------------"      
-) 2>&1 | tee "$(date +"%Y%m%d_%H%M%S").log"
-find -maxdepth 1 -type f -name "*.log" -ctime +31 -exec rm {} \;
+) 2>&1 | tee "/home/andras/Crontablogs/$(date +"%Y%m%d_%H%M%S").log"
+find /home/andras/Crontablogs -type f -name "*.log" -ctime +31 -exec rm {} \;
