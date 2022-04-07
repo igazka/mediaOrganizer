@@ -1,4 +1,4 @@
-The basic flow is that the Seafile app on my phone backs up photos to a "Library/Photos/Camera" The script will read the EXIF data from those phots and move them to another Folder named "Organized" where all photos from phones, cameras, etc. are all collected.
+The basic flow is that the Syncthing app on my phone backs up photos to a "Library/Photos/Camera" The script will read the EXIF data from those phots and move them to another Folder named "Organized" where all photos from phones, cameras, etc. are all collected.
 
 I write this as a Python app but you could use any programming language that can make API calls. Overall, my script retrieves an auth token from Seafile then performs the following steps in a loop:
 
