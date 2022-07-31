@@ -2,9 +2,9 @@
 (
 #bash script to get all files from incoming folders, move them, rename them basesed on their EXIF data IMG_YYYYMMDD_HHMMSS.jpg then move them to destenation
 folderChecked=0 #value to enable reading destanation folder structure 
-srcFolder1=/home/andras/terraswinyo/images/Camera
-srcFolder2=/home/andras/terraswinyo/images/CameraBogi
-destDir=/home/andras/terraswinyo/images
+srcFolder1=/mnt/storage/images/Camera
+srcFolder2=/mnt/storage/images/CameraBogi
+destDir=/mnt/storage/images
 #go to working folder and list of files from folder
 
     workDirContentlist () { #incoming parameter is the srcFolder currently used
@@ -35,7 +35,9 @@ destDir=/home/andras/terraswinyo/images
     }
     checkFileExt(){ #check if fileextension is valid
         length=$(expr length "$1")
-        if [[ $length -gt 0 ]]&&[[ "${1: -4}" == ".jpg" || "${1: -4}" == ".JPG" || "${1: -4}" == ".3gp" || "${1: -4}" == ".mp4" ]]; then
+        fileExtension="${1##*.}"
+        allowedExtensions=("jpg" "3gp" "mp4" "mov" "heic")
+        if [[ $length -gt 0  &&  ${allowedExtensions[*]} =~ "${fileExtension,,}" ]]; then
             echo "good fileExtension: $1"
             return 0
         else
@@ -44,7 +46,8 @@ destDir=/home/andras/terraswinyo/images
         fi
     }
     getExif () { #get exif data
-        if [[ "${1: -4}" == ".jpg" || "${1: -4}" == ".JPG" ]]; then
+        fileExtension="${1##*.}"
+        if [[ "${fileExtension,,}" == "jpg" || "${fileExtension,,}" == "heic" ]]; then
            date=$(exiftool -p '$dateTimeOriginal' "$1" -F)
            if [[ "${#date}" -eq 0 || "$date" == "0000:00:00 00:00:00" ]]; then
              date=$(exiftool -p '$DateAcquired' "$1" -F)
@@ -52,18 +55,14 @@ destDir=/home/andras/terraswinyo/images
               date=$(exiftool -p '${FileModifyDate#;DateFmt("%Y:%m:%d %H:%M:%S")}' "$1")
              fi
            fi
-           ext=".jpg"
+           ext="${fileExtension,,}"
            prefix="IMG"
-         elif [[ "${1: -4}" == ".mp4" || "${1: -4}" == ".MP4" ]]; then
+         elif [[ "${fileExtension,,}" == "mp4" || "${fileExtension,,}" == "3gp" || "${fileExtension,,}" == "mov" ]]  ; then
            date=$(exiftool -p '$mediacreatedate' "$1" -F)
-           ext=".mp4"
+           ext="${fileExtension,,}"
            prefix="VID"
-         elif  [[ "${1: -4}" == ".3gp" || "${1: -4}" == ".3GP" ]]; then
-            date=$(exiftool -p '$mediacreatedate' "$1" -F)
-            ext=".3gp"
-            prefix="VID"
         fi
-        #echo $date, "${#date}"
+        echo $date, "${#date}"
         #if there is no exif data, rename to NOEXIF_DATA + current name
         if [[ "${#date}" -eq 0 || "$date" == "0000:00:00 00:00:00" ]]; then
             newFilename=$prefix"_NOEXIF_DATA_"$1$ext
