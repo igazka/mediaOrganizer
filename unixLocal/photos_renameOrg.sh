@@ -2,9 +2,10 @@
 (
 #bash script to get all files from incoming folders, move them, rename them basesed on their EXIF data IMG_YYYYMMDD_HHMMSS.jpg then move them to destenation
 folderChecked=0 #value to enable reading destanation folder structure 
-srcFolder1=/mnt/storage/images/Camera
-srcFolder2=/mnt/storage/images/CameraBogi
-destDir=/mnt/storage/images
+
+# Export env vars, this will read from the .env file all the variables and they can be used by this script
+export $(grep -v '^#' .env | xargs)
+
 #go to working folder and list of files from folder
 
     workDirContentlist () { #incoming parameter is the srcFolder currently used
@@ -74,7 +75,7 @@ destDir=/mnt/storage/images
             hour=${date:11:2}
             minutes=${date:14:2}
             seconds=${date:17:2}  
-            newFilename=$prefix"_"$year$month$day"_"$hour$minutes$seconds$ext
+            newFilename=$prefix"_"$year$month$day"_"$hour$minutes$seconds"."$ext
             destSubDir="${year}"/"${month}"
         fi
         #echo "$newFilename $destSubDir"
@@ -141,5 +142,5 @@ destDir=/mnt/storage/images
 workDirContentlist $srcFolder1
 workDirContentlist $srcFolder2  
 echo "----------------Script-Done----------------"      
-) 2>&1 | tee "/home/andras/Crontablogs/$(date +"%Y%m%d_%H%M%S").log"
-find /home/andras/Crontablogs -type f -name "*.log" -ctime +31 -exec rm {} \;
+) 2>&1 | tee $logfilepath"/$(date +"%Y%m%d_%H%M%S").log"
+find $logfilepath -type f -name "*.log" -ctime +31 -exec rm {} \;

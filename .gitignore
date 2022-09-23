@@ -1,0 +1,7 @@
+unixLocal/.env
+unixLocal/Exifmodifier.sh
+unixLocal/orgIntoFolders.sh
+unixLocal/renamePhotos.sh
+vscode/
+pythonWindows/
+seafile/
