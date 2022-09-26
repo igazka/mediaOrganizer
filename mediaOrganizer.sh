@@ -1,10 +1,13 @@
 #!/bin/bash
-(
-#bash script to get all files from incoming folders, move them, rename them basesed on their EXIF data IMG_YYYYMMDD_HHMMSS.jpg then move them to destenation
-folderChecked=0 #value to enable reading destanation folder structure 
+#echo "main process"
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd ) #gets the dir of the script
+cd $SCRIPT_DIR
+export $(grep -v '^#' .env | xargs) # Export env vars, this will read from the .env file all the variables and they can be used by subshell aswell
 
-# Export env vars, this will read from the .env file all the variables and they can be used by this script
-export $(grep -v '^#' .env | xargs)
+(
+#this is a subshell
+#get all files from incoming folders, move them, rename them basesed on their EXIF data IMG_YYYYMMDD_HHMMSS.jpg then move them to destenation
+folderChecked=0 #value to enable reading destanation folder structure 
 
 #go to working folder and list of files from folder
 
@@ -143,4 +146,4 @@ workDirContentlist $srcFolder1
 workDirContentlist $srcFolder2  
 echo "----------------Script-Done----------------"      
 ) 2>&1 | tee $logfilepath"/$(date +"%Y%m%d_%H%M%S").log"
-find $logfilepath -type f -name "*.log" -ctime +31 -exec rm {} \;
+find $logfilepath/ -type f -name "*.log" -ctime +31 -exec rm {} \;
