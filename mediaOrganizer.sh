@@ -69,7 +69,7 @@ folderChecked=0 #value to enable reading destanation folder structure
         echo $date, "${#date}"
         #if there is no exif data, rename to NOEXIF_DATA + current name
         if [[ "${#date}" -eq 0 || "$date" == "0000:00:00 00:00:00" ]]; then
-            newFilename=$prefix"_NOEXIF_DATA_"$1$ext
+            newFilename=$prefix"_NOEXIF_DATA_"$1
             destSubDir="NoDate"
         else
             year=${date::4}
